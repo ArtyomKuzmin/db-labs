@@ -1,3 +1,4 @@
+/* выбор самого дорогого и самого дешевого объекта */
 USE cd;
 SELECT facility, 'Самый дорогой' AS 'Качественная стоимость' FROM facilities WHERE initialoutlay = (SELECT MAX(initialoutlay) FROM facilities)
 UNION 
