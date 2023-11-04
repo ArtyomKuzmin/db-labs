@@ -1,5 +1,3 @@
-/* вывод всех членов клуба, зарегистрированных 
-с сентября 2012 года */
+/* вывод всех членов клуба, зарегистрированных с сентября 2012 года */
 USE cd;
-SELECT * FROM members
-WHERE MONTH(joindate) >= 9 AND YEAR(joindate) = 2012 OR YEAR(joindate) > 2012; 
+SELECT memid, surname, firstname FROM members WHERE joindate >= '2012-09-01';

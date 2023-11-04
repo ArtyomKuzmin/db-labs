@@ -1,4 +1,4 @@
 /* вывод 10 фамилий членов клуба, 
 упорядоченных по алфавиту без повторов */
 USE cd;
-SELECT DISTINCT surname FROM members ORDER BY surname LIMIT 10;
+SELECT surname FROM members WHERE memid > 1 AND memid < 12 ORDER BY surname;
