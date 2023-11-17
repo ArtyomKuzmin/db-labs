@@ -1,6 +1,6 @@
 /* выбираем ФИО (== имя + фамилия) всех, кто покупал корты 1 и 2. */
 USE cd;
-SELECT DISTINCT surname, firstname FROM members
-JOIN bookings ON members.memid = bookings.memid
-JOIN facilities ON facilities.facid = bookings.facid
-WHERE facilities.facility LIKE '%Tennis court%';
+SELECT DISTINCT concat(mem.firstname, ' ', mem.surname) AS fullname FROM members mem
+JOIN bookings book ON mem.memid = book.memid
+JOIN facilities fac ON fac.facid = book.facid
+WHERE fac.facility LIKE "%Court 1%" OR fac.facility LIKE "%Court 2%";
