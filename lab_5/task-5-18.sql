@@ -4,27 +4,21 @@ USE cd;
 WITH RECURSIVE DateRange AS (
     SELECT '2012-08-01' AS Date
     UNION ALL
-    SELECT DATE_ADD(Date, INTERVAL 1 DAY)
+    SELECT DATE_ADD(Date, INTERVAL 1 DAY) 
+    FROM DateRange 
+    WHERE Date < '2012-08-31'),
+TotalRevenue AS(
+SELECT DateRange.Date, SUM(
+		CASE 
+			WHEN(DATE(b.starttime) != Date) THEN 0
+            WHEN (b.memid = 0) THEN f.guestcost * b.slots
+            ELSE f.membercost * b.slots
+        END) AS доход
+		(SUM(IF(b.memid = 0, f.guestcost, f.membercost) * b.slots) / 15) as среднее
     FROM DateRange
-    WHERE Date < '2012-08-31'
-),
-TotalRevenue AS (
-    SELECT DateRange.Date,
-    Coalesce(SUM(IF(b.memid = 0, f.guestcost * b.slots, f.membercost * b.slots)), 0) as total_revenue
-    FROM DateRange
-    LEFT JOIN bookings b ON DATE(b.starttime) = Date
+    LEFT JOIN bookings b ON DATE_ADD(Date, INTERVAL -14 day) <= DATE(b.starttime) AND DATE(b.starttime) <= Date
     LEFT JOIN facilities f ON b.facid = f.facid
-    GROUP BY Date
-),
-MovingAverageRevenue AS (
-    SELECT TRD.Date,
-    ROUND((SELECT SUM(total_revenue)
-    FROM TotalRevenue TR
-    WHERE TR.Date >= DATE_SUB(TRD.Date, INTERVAL 15 DAY)
-    AND TR.Date <= TRD.Date) / 15, 4) AS moving_average_revenue
-    FROM TotalRevenue TRD
-)
-SELECT DISTINCT MAR.Date, MAR.moving_average_revenue
-FROM MovingAverageRevenue MAR
-LEFT JOIN bookings b ON DATE(b.starttime) = MAR.Date
-ORDER BY MAR.Date;
+    LEFT JOIN members m ON b.memid = m.memid
+    GROUP BY Date)
+SELECT * FROM TotalRevenue
+ORDER BY Date;	
