@@ -21,7 +21,6 @@ SELECT DateRange.Date, SUM(
     FROM DateRange
     LEFT JOIN bookings b ON DATE_ADD(Date, INTERVAL -14 day) <= DATE(b.starttime) AND DATE(b.starttime) <= Date
     LEFT JOIN facilities f ON b.facid = f.facid
-    LEFT JOIN members m ON b.memid = m.memid
     GROUP BY Date
 )
 SELECT * FROM TotalRevenue
