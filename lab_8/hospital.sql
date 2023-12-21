@@ -1,5 +1,5 @@
 -- Сгенерировать базу данных (скрипт) на основании модели.
-CREATE TABLE HospitalRooms (
+CREATE TABLE Rooms (
   room_number INT PRIMARY KEY,
   bed_count INT,
   department VARCHAR(255),
