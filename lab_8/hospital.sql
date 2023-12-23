@@ -1,4 +1,10 @@
 -- Сгенерировать базу данных (скрипт) на основании модели.
+
+DROP DATABASE IF EXISTS Hospital;
+CREATE DATABASE IF NOT EXISTS Hospital;
+
+USE Hospital;
+
 CREATE TABLE Rooms (
   room_number INT PRIMARY KEY,
   bed_count INT,
