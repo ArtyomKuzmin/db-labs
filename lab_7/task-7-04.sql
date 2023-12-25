@@ -2,30 +2,41 @@
 -- срока окупаемость на заданную долю (в процентах) на основании расчета окупаемости за уже оплаченные периоды. Сохраните расчет в виде csv или sql файла (например, используя временные таблицы)
 
 
-DELIMITER $$
-
-CREATE FUNCTION calculateRentChange(facid_param INT, percentage_change DECIMAL(10,2))
-RETURNS DECIMAL(10,2)
+CREATE FUNCTION `calculate_rental_change`(
+    total_months INT,
+    rental_memid INT,
+    rental_facid INT,
+    percentage_change DECIMAL(10,2)
+) RETURNS int(11)
+READS SQL DATA
 BEGIN
-    DECLARE total_revenue DECIMAL(10,2);
-    DECLARE new_monthly_rent DECIMAL(10,2);
-    
-    -- рассчитываем общую выручку от аренды объекта
-    SELECT SUM(slots * membercost) INTO total_revenue
-    FROM bookings b
-    JOIN facilities f ON b.facid = f.facid
-    WHERE b.facid = facid_param;
-    
-    -- рассчитываем новую стоимость аренды для компенсации изменения срока окупаемости
-    SET new_monthly_rent = (total_revenue * (1 + percentage_change / 100)) / (SELECT COUNT(DISTINCT MONTH(starttime)) FROM bookings WHERE facid = facid_param);
-    
-    RETURN new_monthly_rent;
-END$$
+    DECLARE total_rental_cost DECIMAL(10,2);
+    SELECT SUM(slots * membercost) INTO total_rental_cost
+    FROM bookings
+    JOIN facilities ON bookings.facid = facilities.facid
+    WHERE memid = rental_memid AND facid = rental_facid AND starttime < NOW();
 
-DELIMITER ;
+    DECLARE avg_rental_cost DECIMAL(10,2);
+    SET avg_rental_cost = total_rental_cost / total_months;
 
--- сохраняем расчёт в виде csv файла
-SELECT facid, calculateRentChange(facid, 10) AS new_monthly_rent
-FROM facilities
-INTO OUTFILE '/tmp/rent_changes.csv'
-FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
+    DECLARE new_monthly_rental_cost DECIMAL(10,2);
+    SET new_monthly_rental_cost = avg_rental_cost * (1 + (percentage_change / 100));
+
+    CREATE TEMPORARY TABLE IF NOT EXISTS rental_change_result (
+        month_num INT,
+        rental_cost DECIMAL(10,2)
+    ) ENGINE=MEMORY;
+
+    DECLARE i INT DEFAULT 1;
+    WHILE i <= total_months DO
+        INSERT INTO rental_change_result (month_num, rental_cost) VALUES (i, new_monthly_rental_cost);
+        SET i = i + 1;
+    END WHILE;
+
+    SELECT * FROM rental_change_result
+    INTO OUTFILE 'rental_change_result.csv'
+    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n';
+
+    RETURN total_months;
+END
