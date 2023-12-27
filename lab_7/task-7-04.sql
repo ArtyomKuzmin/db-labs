@@ -44,7 +44,7 @@ END &&
 
 DELIMITER ;
 
-SELECT getDiffPayback(2, 2, '2012-07-31-23:59:59')
+SELECT paybackPeriod(2, 2, '2012-07-31-23:59:59')
 INTO OUTFILE 'rental_change_result.csv' 
     FIELDS ENCLOSED BY '"' TERMINATED BY ';' ESCAPED BY '"' 
     LINES TERMINATED BY '\r\n';
