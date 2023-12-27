@@ -1,29 +1,21 @@
-DELIMITER $$
+-- произведите изменения в стоимости аренды объектов согласно расчету задания Task-7-4, написав update-скрипт. 
+-- напишите скрипт отмечающий оплату всех аренд за , используя функцию Task-7-3 . 
+-- сравните, совпадают ли расчетные данные с теми, что были Вами получены в задании Task-7-4.    
 
-CREATE FUNCTION calculateRentChange(facid_param INT, percentage_change DECIMAL(10,2))
-RETURNS DECIMAL(10,2)
-BEGIN
-    DECLARE total_revenue DECIMAL(10,2);
-    DECLARE new_monthly_rent DECIMAL(10,2);
-    
-    SELECT SUM(slots * membercost) INTO total_revenue
-    FROM bookings b
-    JOIN facilities f ON b.facid = f.facid
-    WHERE b.facid = facid_param;
-    
-    SET new_monthly_rent = (total_revenue * (1 + percentage_change / 100)) / (SELECT COUNT(DISTINCT MONTH(starttime)) FROM bookings WHERE facid = facid_param);
-    
-    RETURN new_monthly_rent;
-END$$
+USE cd;
 
-DELIMITER ;
-
--- изменение стоимости аренды объектов согласно расчёту функции calculateRentChange
-UPDATE facilities
-SET monthlymaintenance = calculateRentChange(facid, 10)
-WHERE facid = facid_param;
-
--- отмечаем оплату всех аренд за августа 2012 года
-UPDATE bookings
-SET paid = TRUE
-WHERE MONTH(starttime) = 8 AND YEAR(starttime) = 2012;
+START TRANSACTION;
+    -- task-7-03.sql
+    CALL payback(1, MONTH('2012-07-03'), YEAR('2012-07-03'));
+    UPDATE facilities
+    SET
+        guestcost = guestcost * (SELECT paybackPeriod(facid, 
+        2, '2012-07-31-23:59:59')),
+        membercost = membercost * (SELECT paybackPeriod(facid, 
+        2, '2012-07-31-23:59:59'));
+    UPDATE bookings
+    SET payed = 1
+    WHERE DATE(starttime) < '2012-09-01' AND DATE(starttime) >= '2012-08-01';
+    -- task-7-03.sql + 1 месяц
+    CALL payback(1, MONTH('2012-08-03'), YEAR('2012-08-03'));
+ROLLBACK; -- или COMMIT тогда сохранятся изменения, сделанные в рамках транзакции
