@@ -5,8 +5,8 @@ USE cd;
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS payback $$
-CREATE PROCEDURE payback(facid INT, m INT, y INT)
+DROP PROCEDURE IF EXISTS recoupment $$
+CREATE PROCEDURE recoupment(facid INT, m INT, y INT)
     READS SQL DATA
     NOT DETERMINISTIC
 BEGIN
@@ -20,4 +20,4 @@ BEGIN
     ORDER BY b.facid;
 END $$
 
-CALL payback(1, MONTH('2012-07-03'), YEAR('2012-07-03'));
+CALL recoupment(1, MONTH('2012-07-03'), YEAR('2012-07-03'));

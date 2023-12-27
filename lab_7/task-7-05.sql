@@ -6,7 +6,7 @@ USE cd;
 
 START TRANSACTION;
     -- task-7-03.sql
-    CALL payback(1, MONTH('2012-07-03'), YEAR('2012-07-03'));
+    CALL recoupment(1, MONTH('2012-07-03'), YEAR('2012-07-03'));
     UPDATE facilities
     SET
         guestcost = guestcost * (SELECT paybackPeriod(facid, 
@@ -17,5 +17,5 @@ START TRANSACTION;
     SET payed = 1
     WHERE DATE(starttime) < '2012-09-01' AND DATE(starttime) >= '2012-08-01';
     -- task-7-03.sql + 1 месяц
-    CALL payback(1, MONTH('2012-08-03'), YEAR('2012-08-03'));
+    CALL recoupment(1, MONTH('2012-08-03'), YEAR('2012-08-03'));
 ROLLBACK; -- или COMMIT тогда сохранятся изменения, сделанные в рамках транзакции
